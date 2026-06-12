@@ -13,6 +13,12 @@ class ProductState {
 
   final int skip;
   final bool hasMore;
+  final double minPrice;
+  final double maxPrice;
+  final double absoluteMaxPrice;
+
+  // Wishlist
+  final List<ProductModels> wishlistedProducts;
 
   const ProductState({
     this.products = const [],
@@ -24,9 +30,25 @@ class ProductState {
     this.selectedCategory,
     this.skip = 0,
     this.hasMore = true,
+    this.wishlistedProducts = const [],
+    this.minPrice = 0,
+    this.maxPrice = 10000,
+    this.absoluteMaxPrice = 10000,
   });
 
-  ProductState copywith({
+  // Computed helpers
+  Set<int> get wishlistedIds =>
+      wishlistedProducts.map((p) => p.id).toSet();
+
+  int get wishlistCount => wishlistedProducts.length;
+  int get totalCount => products.length;
+
+  bool get isFiltered =>
+      selectedCategory != null || minPrice > 0 || maxPrice < absoluteMaxPrice;
+
+  bool isWishlisted(int productId) => wishlistedIds.contains(productId);
+
+  ProductState copyWith({
     List<ProductModels>? products,
     List<CategoryModel>? categories,
     bool? isLoading,
@@ -36,17 +58,29 @@ class ProductState {
     String? selectedCategory,
     int? skip,
     bool? hasMore,
+    List<ProductModels>? wishlistedProducts,
+    double? minPrice,
+    double? maxPrice,
+    double? absoluteMaxPrice,
+    bool clearCategory = false,
+    bool clearError = false,
+    bool clearSearch = false,
   }) {
     return ProductState(
       products: products ?? this.products,
       categories: categories ?? this.categories,
       isLoading: isLoading ?? this.isLoading,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
-      error: error ?? this.error,
-      searchQuery: searchQuery ?? this.searchQuery,
-      selectedCategory: selectedCategory ?? this.selectedCategory,
+      error: clearError ? null : error ?? this.error,
+      searchQuery: clearSearch ? '' : searchQuery ?? this.searchQuery,
+      selectedCategory:
+          clearCategory ? null : selectedCategory ?? this.selectedCategory,
       skip: skip ?? this.skip,
       hasMore: hasMore ?? this.hasMore,
+      wishlistedProducts: wishlistedProducts ?? this.wishlistedProducts,
+      minPrice: minPrice ?? this.minPrice,
+      maxPrice: maxPrice ?? this.maxPrice,
+      absoluteMaxPrice: absoluteMaxPrice ?? this.absoluteMaxPrice,
     );
   }
 }

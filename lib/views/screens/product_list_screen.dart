@@ -1,15 +1,15 @@
+import 'package:catalog/core/themes/theme.dart';
+import 'package:catalog/views/screens/wishlist_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../controllers/product_notifier.dart';
 import '../../models/product_models.dart';
+
 import '../widgets/product_card.dart';
 import '../widgets/search_bar.dart';
-
 import '../widgets/filter_bottom_sheet.dart';
 import 'product_detail_screen.dart';
-
 
 class ProductListScreen extends ConsumerStatefulWidget {
   const ProductListScreen({super.key});
@@ -25,9 +25,9 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    // Initial load
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(ProductNotifier.notifier).loadProducts();
+      ref.read(productProvider.notifier).loadProducts();
+      ref.read(productProvider.notifier).loadCategories();
     });
   }
 
@@ -40,35 +40,30 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
   void _onScroll() {
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 300) {
-      ref.read(ProductNotifier.notifier).loadMore();
+      ref.read(productProvider.notifier).loadMore();
     }
   }
 
   void _openFilter(BuildContext context) {
-    final state = ref.read(productControllerProvider);
+    final state = ref.read(productProvider);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => FilterBottomSheet(
-        categories: state.categories,
+        categories: state.categories.map((c) => c.slug).toList(),
         selectedCategory: state.selectedCategory,
-        priceRange: RangeValues(
-          state.minPrice,
-          state.maxPrice,
-        ),
+        priceRange: RangeValues(state.minPrice, state.maxPrice),
         maxPrice: state.absoluteMaxPrice,
         onCategoryChanged: (cat) {
-          ref.read(productControllerProvider.notifier).filterByCategory(cat);
+          ref.read(productProvider.notifier).filterByCategory(cat);
         },
         onPriceRangeChanged: (range) {
-          ref
-              .read(productControllerProvider.notifier)
-              .filterByPrice(range.start, range.end);
+          ref.read(productProvider.notifier).filterByPrice(range.start, range.end);
         },
         onApply: () {},
         onReset: () {
-          ref.read(productControllerProvider.notifier).resetFilters();
+          ref.read(productProvider.notifier).resetFilters();
         },
       ),
     );
@@ -76,7 +71,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(productControllerProvider);
+    final state = ref.watch(productProvider);
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
@@ -85,10 +80,9 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
+            // ── Header ──────────────────────────
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -100,26 +94,20 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                         children: [
                           Text(
                             'Discover',
-                            style: TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.w800,
+                            style: AppTextStyles.heading.copyWith(
                               color: colorScheme.onBackground,
-                              letterSpacing: -0.5,
                             ),
                           ),
                           Text(
                             '${state.totalCount} products found',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.grey.shade500,
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: AppTextStyles.caption,
                           ),
                         ],
                       ),
+
                       // Wishlist icon
                       GestureDetector(
-                        onTap: () => Navigator.pushNamed(context, '/wishlist'),
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_)=> const WishlistScreen())),
                         child: Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
@@ -127,18 +115,21 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Stack(
+                            clipBehavior: Clip.none,
                             children: [
-                              const Icon(Icons.favorite_outline_rounded,
-                                  size: 24),
+                              const Icon(
+                                Icons.favorite_outline_rounded,
+                                size: 24,
+                              ),
                               if (state.wishlistCount > 0)
                                 Positioned(
-                                  top: -2,
-                                  right: -2,
+                                  top: -4,
+                                  right: -4,
                                   child: Container(
                                     width: 14,
                                     height: 14,
-                                    decoration: BoxDecoration(
-                                      color: Colors.redAccent,
+                                    decoration: const BoxDecoration(
+                                      color: AppColors.accent,
                                       shape: BoxShape.circle,
                                     ),
                                     child: Center(
@@ -159,19 +150,18 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                       ),
                     ],
                   ),
+
                   const SizedBox(height: 16),
+
                   ProductSearchBar(
                     onSearch: (query) {
-                      ref
-                          .read(productControllerProvider.notifier)
-                          .search(query);
+                      ref.read(productProvider.notifier).search(query);
                     },
                     onFilterTap: () => _openFilter(context),
                   ),
 
-                  // Active filter chips
-                  if (state.selectedCategory != null ||
-                      state.isFiltered) ...[
+                  // ── Active filter chips ──────
+                  if (state.isFiltered) ...[
                     const SizedBox(height: 12),
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
@@ -181,15 +171,16 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                             _FilterChip(
                               label: state.selectedCategory!,
                               onRemove: () => ref
-                                  .read(productControllerProvider.notifier)
+                                  .read(productProvider.notifier)
                                   .filterByCategory(null),
                             ),
-                          if (state.isFiltered)
+                          if (state.minPrice > 0 ||
+                              state.maxPrice < state.absoluteMaxPrice)
                             _FilterChip(
                               label:
                                   '₹${state.minPrice.toStringAsFixed(0)}–₹${state.maxPrice.toStringAsFixed(0)}',
                               onRemove: () => ref
-                                  .read(productControllerProvider.notifier)
+                                  .read(productProvider.notifier)
                                   .resetFilters(),
                             ),
                         ],
@@ -200,21 +191,21 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
               ),
             ),
 
-            // Content
+            // ── Content ─────────────────────────
             Expanded(
               child: state.error != null
                   ? _ErrorView(
                       message: state.error!,
-                      onRetry: () => ref
-                          .read(productControllerProvider.notifier)
-                          .init(),
+                      onRetry: () =>
+                          ref.read(productProvider.notifier).loadProducts(),
                     )
                   : _ProductGrid(
                       products: state.isLoading && state.products.isEmpty
                           ? List.generate(10, (_) => null)
                           : state.products,
-                      isInitialLoading:
-                          state.isLoading && state.products.isEmpty,
+                      
+              
+                      isInitialLoading: state.isLoading && state.products.isEmpty,
                       isLoadingMore: state.isLoadingMore,
                       scrollController: _scrollController,
                       wishlisted: state.wishlistedIds,
@@ -222,15 +213,12 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) =>
-                                ProductDetailScreen(product: product),
+                            builder: (_) => ProductDetailScreen(product: product),
                           ),
                         );
                       },
                       onWishlistTap: (product) {
-                        ref
-                            .read(productControllerProvider.notifier)
-                            .toggleWishlist(product);
+                        ref.read(productProvider.notifier).toggleWishlist(product);
                       },
                     ),
             ),
@@ -241,14 +229,19 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
   }
 }
 
+// ─────────────────────────────────────────
+//  Product Grid
+// ─────────────────────────────────────────
 class _ProductGrid extends StatelessWidget {
-  final List<ProductModel?> products;
-  final bool isInitialLoading;
-  final bool isLoadingMore;
+  final List<ProductModels?> products;
+
+  final bool isInitialLoading;    
+  final bool isLoadingMore;       
   final ScrollController scrollController;
   final Set<int> wishlisted;
-  final ValueChanged<ProductModel> onTap;
-  final ValueChanged<ProductModel> onWishlistTap;
+  final ValueChanged<ProductModels> onTap;
+  final ValueChanged<ProductModels> onWishlistTap;
+
 
   const _ProductGrid({
     required this.products,
@@ -258,10 +251,12 @@ class _ProductGrid extends StatelessWidget {
     required this.wishlisted,
     required this.onTap,
     required this.onWishlistTap,
+   
   });
 
   @override
   Widget build(BuildContext context) {
+    // ✅ fixed: show empty only when NOT loading
     if (products.isEmpty && !isInitialLoading) {
       return const _EmptyView();
     }
@@ -277,12 +272,13 @@ class _ProductGrid extends StatelessWidget {
                 final product = products[index];
                 return ProductCard(
                   product: product,
+                  
+                  
                   isLoading: isInitialLoading,
-                  isWishlisted:
-                      product != null && wishlisted.contains(product.id),
+                  // ✅ fixed: wishlisted.contains returns bool, not bool?
+                  isWishlisted: product != null && wishlisted.contains(product.id),
                   onTap: product != null ? () => onTap(product) : null,
-                  onWishlistTap:
-                      product != null ? () => onWishlistTap(product) : null,
+                  onWishlistTap: product != null ? () => onWishlistTap(product) : null,
                 );
               },
               childCount: products.length,
@@ -295,13 +291,12 @@ class _ProductGrid extends StatelessWidget {
             ),
           ),
         ),
+        // ✅ fixed: isLoadingMore is bool not bool?
         if (isLoadingMore)
           const SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.symmetric(vertical: 20),
-              child: Center(
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
+              child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
             ),
           ),
         const SliverToBoxAdapter(child: SizedBox(height: 20)),
@@ -310,6 +305,9 @@ class _ProductGrid extends StatelessWidget {
   }
 }
 
+// ─────────────────────────────────────────
+//  Filter Chip
+// ─────────────────────────────────────────
 class _FilterChip extends StatelessWidget {
   final String label;
   final VoidCallback onRemove;
@@ -318,35 +316,29 @@ class _FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       margin: const EdgeInsets.only(right: 8),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+        color: colorScheme.primary.withOpacity(0.1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
-        ),
+        border: Border.all(color: colorScheme.primary.withOpacity(0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             label,
-            style: TextStyle(
-              fontSize: 12,
+            style: AppTextStyles.caption.copyWith(
+              color: colorScheme.primary,
               fontWeight: FontWeight.w600,
-              color: Theme.of(context).colorScheme.primary,
             ),
           ),
           const SizedBox(width: 4),
           GestureDetector(
             onTap: onRemove,
-            child: Icon(
-              Icons.close_rounded,
-              size: 14,
-              color: Theme.of(context).colorScheme.primary,
-            ),
+            child: Icon(Icons.close_rounded, size: 14, color: colorScheme.primary),
           ),
         ],
       ),
@@ -354,6 +346,9 @@ class _FilterChip extends StatelessWidget {
   }
 }
 
+// ─────────────────────────────────────────
+//  Empty View
+// ─────────────────────────────────────────
 class _EmptyView extends StatelessWidget {
   const _EmptyView();
 
@@ -363,21 +358,16 @@ class _EmptyView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.search_off_rounded,
-              size: 64, color: Colors.grey.shade300),
+          Icon(Icons.search_off_rounded, size: 64, color: Colors.grey.shade300),
           const SizedBox(height: 16),
           Text(
             'No products found',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey.shade500,
-            ),
+            style: AppTextStyles.title.copyWith(color: Colors.grey.shade500),
           ),
           const SizedBox(height: 6),
           Text(
             'Try adjusting your search or filters',
-            style: TextStyle(fontSize: 13, color: Colors.grey.shade400),
+            style: AppTextStyles.caption,
           ),
         ],
       ),
@@ -385,6 +375,9 @@ class _EmptyView extends StatelessWidget {
   }
 }
 
+// ─────────────────────────────────────────
+//  Error View
+// ─────────────────────────────────────────
 class _ErrorView extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;
@@ -399,29 +392,18 @@ class _ErrorView extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.wifi_off_rounded,
-                size: 64, color: Colors.grey.shade300),
+            Icon(Icons.wifi_off_rounded, size: 64, color: Colors.grey.shade300),
             const SizedBox(height: 16),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey.shade600,
-              ),
+              style: AppTextStyles.body.copyWith(color: Colors.grey.shade600),
             ),
             const SizedBox(height: 20),
             ElevatedButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh_rounded, size: 18),
               label: const Text('Try Again'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 24, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
             ),
           ],
         ),

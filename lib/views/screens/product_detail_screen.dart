@@ -1,3 +1,4 @@
+import 'package:catalog/models/review_model.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -49,7 +50,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen>
   Widget build(BuildContext context) {
     final product = widget.product;
     final colorScheme = Theme.of(context).colorScheme;
-    final state = ref.watch(ProductNotifier());
+    final state = ref.watch(productProvider);
     final isWishlisted = state.wishlistedIds.contains(product.id);
 
     return Scaffold(
@@ -87,7 +88,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen>
                   onTap: () {
                     _animateFab();
                     ref
-                        .read(productControllerProvider.notifier)
+                        .read(productProvider.notifier)
                         .toggleWishlist(product);
                   },
                   child: Container(
@@ -515,7 +516,7 @@ class _ReviewCard extends StatelessWidget {
 }
 
 class _AddToCartBar extends StatelessWidget {
-  final ProductModel product;
+  final ProductModels product;
 
   const _AddToCartBar({required this.product});
 

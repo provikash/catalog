@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/widgets.dart';
 
 import '../models/product_response.dart';
 import '../core/constants/api_constants.dart';
@@ -11,10 +12,22 @@ class ApiService {
 
   Future<ProductResponse> getProducts({int limit = 20, int skip = 0}) async {
     try {
+      debugPrint('=================================');
+
+    debugPrint('BASE URL  : ${dio.options.baseUrl}');
+    debugPrint('ENDPOINT  : ${ApiConstants.products}');
+    debugPrint('FULL URL  : ${dio.options.baseUrl}${ApiConstants.products}');
+
+      
+
+      debugPrint('=================================');
       final response = await dio.get(
         ApiConstants.products,
         queryParameters: {'limit': limit, 'skip': skip},
       );
+
+      print(response);
+      print(ApiConstants.products);
 
       return ProductResponse.fromJson(response.data);
     } on DioException catch (e) {
@@ -36,7 +49,7 @@ class ApiService {
 
   Future<ProductResponse> getProductsByCategory(String category) async {
     try {
-      final response = await dio.get('${ApiConstants.categories}/{$category}');
+      final response = await dio.get('products/category/$category');
 
       return ProductResponse.fromJson(response.data);
     } on DioException catch (e) {

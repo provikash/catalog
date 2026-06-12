@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../../controllers/product_controller.dart';
-import '../../models/product_model.dart';
+
+import '../../controllers/product_notifier.dart';
+import '../../models/product_models.dart';
 import 'product_detail_screen.dart';
 
 class WishlistScreen extends ConsumerWidget {
   const WishlistScreen({super.key});
+ 
+
+  
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(productControllerProvider);
+    final state = ref.watch(productProvider);
     final wishlisted = state.wishlistedProducts;
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -88,7 +92,7 @@ class WishlistScreen extends ConsumerWidget {
                           },
                           onRemove: () {
                             ref
-                                .read(productControllerProvider.notifier)
+                                .read(productProvider.notifier)
                                 .toggleWishlist(product);
                           },
                         );
@@ -103,7 +107,7 @@ class WishlistScreen extends ConsumerWidget {
 }
 
 class _WishlistItem extends StatefulWidget {
-  final ProductModel product;
+  final ProductModels product;
   final VoidCallback onTap;
   final VoidCallback onRemove;
 

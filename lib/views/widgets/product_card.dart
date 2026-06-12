@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import '../../models/product_model.dart';
+import '../../models/product_models.dart';
 
 class ProductCard extends StatefulWidget {
-  final ProductModel? product;
+  final ProductModels? product;
   final bool isLoading;
   final VoidCallback? onTap;
   final VoidCallback? onWishlistTap;
@@ -113,7 +113,7 @@ class _ProductCardState extends State<ProductCard>
                               ),
                       ),
                     ),
-                    // Discount badge
+                    
                     if (!widget.isLoading &&
                         (widget.product?.discountPercentage ?? 0) > 0)
                       Positioned(
