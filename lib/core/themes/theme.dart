@@ -33,6 +33,23 @@ class AppColors {
   static const success = Color(0xFF4CAF50);
   static const warning = Color(0xFFFFC107);
   static const error   = Color(0xFFEF5350);
+
+ 
+
+   // Product Card
+  static const Color imageBackground = Color(0xFFF8F9FC);
+
+  static const Color imageBorder = Color(0xFFE8EAF3);
+
+  static const Color cardShadow = Color(0x14000000);
+
+  static const Color wishlistActive = accent;
+
+  static const Color wishlistInactive = Color(0xFF9CA3AF);
+
+  static const Color discountBadge = accent;
+
+  static const Color rating = warning;
 }
 
 // ─────────────────────────────────────────

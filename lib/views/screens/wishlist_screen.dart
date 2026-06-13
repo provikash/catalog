@@ -1,3 +1,4 @@
+import 'package:catalog/core/themes/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -8,18 +9,17 @@ import 'product_detail_screen.dart';
 
 class WishlistScreen extends ConsumerWidget {
   const WishlistScreen({super.key});
- 
-
-  
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(productProvider);
     final wishlisted = state.wishlistedProducts;
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
 
     return Scaffold(
-      backgroundColor: colorScheme.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -37,28 +37,29 @@ class WishlistScreen extends ConsumerWidget {
                         color: colorScheme.surfaceVariant.withOpacity(0.5),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Icon(Icons.arrow_back_ios_new_rounded,
-                          size: 18),
+                      child: Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        size: 18,
+                        color: colorScheme.onSurface,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 14),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Wishlist',
-                        style: TextStyle(
+                        style: textTheme.headlineLarge?.copyWith(
                           fontSize: 24,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -0.4,
+                          color: colorScheme.onBackground,
                         ),
                       ),
                       Text(
                         '${wishlisted.length} item${wishlisted.length == 1 ? '' : 's'}',
-                        style: TextStyle(
+                        style: AppTextStyles.caption.copyWith(
                           fontSize: 13,
-                          color: Colors.grey.shade500,
-                          fontWeight: FontWeight.w500,
+                          color: colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -145,6 +146,7 @@ class _WishlistItemState extends State<_WishlistItem>
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return GestureDetector(
       onTapDown: (_) => _controller.reverse(),
@@ -163,7 +165,7 @@ class _WishlistItemState extends State<_WishlistItem>
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: AppColors.cardShadow,
                 blurRadius: 10,
                 offset: const Offset(0, 3),
               ),
@@ -182,14 +184,16 @@ class _WishlistItemState extends State<_WishlistItem>
                   placeholder: (_, __) => Container(
                     width: 80,
                     height: 80,
-                    color: Colors.grey.shade100,
+                    color: AppColors.imageBackground,
                   ),
                   errorWidget: (_, __, ___) => Container(
                     width: 80,
                     height: 80,
-                    color: Colors.grey.shade100,
-                    child: const Icon(Icons.image_not_supported,
-                        color: Colors.grey),
+                    color: colorScheme.surfaceVariant,
+                    child: const Icon(
+                      Icons.image_not_supported,
+                      color: AppColors.wishlistInactive,
+                    ),
                   ),
                 ),
               ),
@@ -204,23 +208,24 @@ class _WishlistItemState extends State<_WishlistItem>
                       widget.product.title,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: textTheme.titleMedium?.copyWith(
                         fontSize: 14,
-                        fontWeight: FontWeight.w600,
                         height: 1.3,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(Icons.star_rounded,
-                            size: 13, color: Color(0xFFFFC107)),
+                        const Icon(
+                          Icons.star_rounded,
+                          size: 13,
+                          color: AppColors.rating,
+                        ),
                         const SizedBox(width: 2),
                         Text(
                           widget.product.rating.toStringAsFixed(1),
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey.shade500,
+                          style: AppTextStyles.caption.copyWith(
+                            color: colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],
@@ -230,9 +235,8 @@ class _WishlistItemState extends State<_WishlistItem>
                       children: [
                         Text(
                           '₹${widget.product.discountedPrice.toStringAsFixed(0)}',
-                          style: TextStyle(
+                          style: AppTextStyles.price.copyWith(
                             fontSize: 15,
-                            fontWeight: FontWeight.w800,
                             color: colorScheme.primary,
                           ),
                         ),
@@ -240,9 +244,9 @@ class _WishlistItemState extends State<_WishlistItem>
                           const SizedBox(width: 6),
                           Text(
                             '₹${widget.product.price.toStringAsFixed(0)}',
-                            style: TextStyle(
+                            style: AppTextStyles.caption.copyWith(
                               fontSize: 12,
-                              color: Colors.grey.shade400,
+                              color: colorScheme.onSurfaceVariant,
                               decoration: TextDecoration.lineThrough,
                             ),
                           ),
@@ -259,12 +263,12 @@ class _WishlistItemState extends State<_WishlistItem>
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.redAccent.withOpacity(0.1),
+                    color: colorScheme.error.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.delete_outline_rounded,
-                    color: Colors.redAccent,
+                    color: colorScheme.error,
                     size: 20,
                   ),
                 ),
@@ -284,6 +288,9 @@ class _EmptyWishlist extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(40),
@@ -293,24 +300,22 @@ class _EmptyWishlist extends StatelessWidget {
             Icon(
               Icons.favorite_border_rounded,
               size: 72,
-              color: Colors.grey.shade300,
+              color: AppColors.wishlistInactive,
             ),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               'Your wishlist is empty',
-              style: TextStyle(
+              style: textTheme.titleLarge?.copyWith(
                 fontSize: 18,
-                fontWeight: FontWeight.w700,
+                color: colorScheme.onBackground,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'Tap the heart icon on any product to save it here',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey.shade500,
-                height: 1.5,
+              style: textTheme.bodyLarge?.copyWith(
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 28),
@@ -319,15 +324,10 @@ class _EmptyWishlist extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(
                     horizontal: 32, vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                elevation: 0,
               ),
               child: const Text(
                 'Browse Products',
-                style:
-                    TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                style: AppTextStyles.button,
               ),
             ),
           ],

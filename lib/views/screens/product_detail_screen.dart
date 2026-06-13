@@ -1,3 +1,4 @@
+import 'package:catalog/core/themes/theme.dart';
 import 'package:catalog/models/review_model.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -49,36 +50,41 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen>
   @override
   Widget build(BuildContext context) {
     final product = widget.product;
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
     final state = ref.watch(productProvider);
     final isWishlisted = state.wishlistedIds.contains(product.id);
 
     return Scaffold(
-      backgroundColor: colorScheme.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: CustomScrollView(
         slivers: [
           // App Bar with image
           SliverAppBar(
             expandedHeight: 340,
             pinned: true,
-            backgroundColor: colorScheme.background,
+            backgroundColor: theme.appBarTheme.backgroundColor,
             elevation: 0,
             leading: GestureDetector(
               onTap: () => Navigator.pop(context),
               child: Container(
                 margin: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: colorScheme.surface,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
+                      color: AppColors.cardShadow,
                       blurRadius: 8,
                     ),
                   ],
                 ),
-                child: const Icon(Icons.arrow_back_ios_new_rounded,
-                    size: 18, color: Colors.black87),
+                child: Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  size: 18,
+                  color: colorScheme.onSurface,
+                ),
               ),
             ),
             actions: [
@@ -95,11 +101,11 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen>
                     margin: const EdgeInsets.all(8),
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: colorScheme.surface,
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.08),
+                          color: AppColors.cardShadow,
                           blurRadius: 8,
                         ),
                       ],
@@ -114,8 +120,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen>
                             : Icons.favorite_border_rounded,
                         key: ValueKey(isWishlisted),
                         size: 20,
-                        color:
-                            isWishlisted ? Colors.redAccent : Colors.black87,
+                        color: isWishlisted
+                            ? AppColors.wishlistActive
+                            : colorScheme.onSurface,
                       ),
                     ),
                   ),
@@ -126,23 +133,29 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen>
               background: Stack(
                 children: [
                   // Main image
-                  CachedNetworkImage(
-                    imageUrl: product.images.isNotEmpty
-                        ? product.images[_selectedImageIndex]
-                        : product.thumbnail,
-                    width: double.infinity,
-                    height: double.infinity,
-                    fit: BoxFit.cover,
-                    placeholder: (_, __) => Container(
-                      color: Colors.grey.shade100,
-                      child: const Center(
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                  Hero(
+                    tag: 'product-image-${widget.product.id}',
+                    child: CachedNetworkImage(
+                      imageUrl: product.images.isNotEmpty
+                          ? product.images[_selectedImageIndex]
+                          : product.thumbnail,
+                      width: double.infinity,
+                      height: double.infinity,
+                      fit: BoxFit.cover,
+                      placeholder: (_, __) => Container(
+                        color: AppColors.imageBorder,
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: colorScheme.primary,
+                          ),
+                        ),
                       ),
-                    ),
-                    errorWidget: (_, __, ___) => Container(
-                      color: Colors.grey.shade100,
-                      child: const Icon(Icons.image_not_supported,
-                          size: 48, color: Colors.grey),
+                      errorWidget: (_, __, ___) => Container(
+                        color: colorScheme.surfaceVariant,
+                        child: const Icon(Icons.image_not_supported,
+                            size: 48, color: AppColors.wishlistInactive),
+                      ),
                     ),
                   ),
                   // Gradient overlay
@@ -158,7 +171,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen>
                           end: Alignment.bottomCenter,
                           colors: [
                             Colors.transparent,
-                            colorScheme.background,
+                            theme.scaffoldBackgroundColor,
                           ],
                         ),
                       ),
@@ -186,7 +199,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen>
                               decoration: BoxDecoration(
                                 color: _selectedImageIndex == i
                                     ? colorScheme.primary
-                                    : Colors.grey.shade300,
+                                    : colorScheme.outline,
                                 borderRadius: BorderRadius.circular(4),
                               ),
                             ),
@@ -216,9 +229,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen>
                     ),
                     child: Text(
                       product.category.toUpperCase(),
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
+                      style: AppTextStyles.caption.copyWith(
                         color: colorScheme.primary,
                         letterSpacing: 0.8,
                       ),
@@ -229,11 +240,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen>
                   // Title
                   Text(
                     product.title,
-                    style: const TextStyle(
+                    style: textTheme.headlineLarge?.copyWith(
                       fontSize: 22,
-                      fontWeight: FontWeight.w800,
-                      height: 1.2,
-                      letterSpacing: -0.3,
+                      color: colorScheme.onBackground,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -245,20 +254,19 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen>
                         padding: const EdgeInsets.symmetric(
                             horizontal: 10, vertical: 5),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFFF8E1),
+                          color: AppColors.warning.withOpacity(0.12),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Row(
                           children: [
                             const Icon(Icons.star_rounded,
-                                size: 16, color: Color(0xFFFFC107)),
+                                size: 16, color: AppColors.rating),
                             const SizedBox(width: 4),
                             Text(
                               product.rating.toStringAsFixed(1),
-                              style: const TextStyle(
-                                fontSize: 13,
+                              style: AppTextStyles.caption.copyWith(
                                 fontWeight: FontWeight.w700,
-                                color: Color(0xFF795548),
+                                color: colorScheme.onSurface,
                               ),
                             ),
                           ],
@@ -267,9 +275,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen>
                       const SizedBox(width: 10),
                       Text(
                         '(${product.reviews.length} reviews)',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey.shade500,
+                        style: AppTextStyles.caption.copyWith(
+                          color: colorScheme.onSurfaceVariant,
                         ),
                       ),
                       const Spacer(),
@@ -278,18 +285,17 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen>
                             horizontal: 10, vertical: 5),
                         decoration: BoxDecoration(
                           color: product.stock > 0
-                              ? Colors.green.withOpacity(0.1)
-                              : Colors.red.withOpacity(0.1),
+                              ? AppColors.success.withOpacity(0.1)
+                              : AppColors.error.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
                           product.availabilityStatus,
-                          style: TextStyle(
-                            fontSize: 12,
+                          style: AppTextStyles.caption.copyWith(
                             fontWeight: FontWeight.w600,
                             color: product.stock > 0
-                                ? Colors.green.shade700
-                                : Colors.red,
+                                ? AppColors.success
+                                : colorScheme.error,
                           ),
                         ),
                       ),
@@ -303,11 +309,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen>
                     children: [
                       Text(
                         '₹${product.discountedPrice.toStringAsFixed(0)}',
-                        style: TextStyle(
+                        style: AppTextStyles.price.copyWith(
                           fontSize: 28,
-                          fontWeight: FontWeight.w900,
                           color: colorScheme.primary,
-                          letterSpacing: -0.5,
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -316,9 +320,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen>
                           padding: const EdgeInsets.only(bottom: 3),
                           child: Text(
                             '₹${product.price.toStringAsFixed(0)}',
-                            style: TextStyle(
+                            style: AppTextStyles.price.copyWith(
                               fontSize: 16,
-                              color: Colors.grey.shade400,
+                              color: colorScheme.onSurfaceVariant,
                               decoration: TextDecoration.lineThrough,
                             ),
                           ),
@@ -328,14 +332,13 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen>
                           padding: const EdgeInsets.symmetric(
                               horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
-                            color: Colors.redAccent,
+                            color: AppColors.discountBadge,
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
                             '${product.discountPercentage.toStringAsFixed(0)}% OFF',
-                            style: const TextStyle(
+                            style: AppTextStyles.caption.copyWith(
                               color: Colors.white,
-                              fontSize: 11,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -349,20 +352,15 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen>
                   const SizedBox(height: 20),
 
                   // Description
-                  const Text(
+                  Text(
                     'Description',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: textTheme.titleLarge,
                   ),
                   const SizedBox(height: 8),
                   Text(
                     product.description,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade600,
-                      height: 1.6,
+                    style: textTheme.bodyLarge?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -390,12 +388,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen>
 
                   // Reviews
                   if (product.reviews.isNotEmpty) ...[
-                    const Text(
+                    Text(
                       'Reviews',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                      ),
+                      style: textTheme.titleLarge,
                     ),
                     const SizedBox(height: 12),
                     ...product.reviews
@@ -425,24 +420,32 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.4),
+        color: colorScheme.surfaceVariant.withOpacity(0.4),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary),
+          Icon(icon, size: 18, color: colorScheme.primary),
           const SizedBox(width: 10),
           Text(
             label,
-            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+            style: textTheme.titleMedium?.copyWith(fontSize: 13),
           ),
           const Spacer(),
-          Text(
-            value,
-            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              style: textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
           ),
         ],
       ),
@@ -457,11 +460,14 @@ class _ReviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+        color: colorScheme.surfaceVariant.withOpacity(0.3),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -471,16 +477,14 @@ class _ReviewCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 16,
-                backgroundColor:
-                    Theme.of(context).colorScheme.primary.withOpacity(0.15),
+                backgroundColor: colorScheme.primary.withOpacity(0.15),
                 child: Text(
                   review.reviewerName.isNotEmpty
                       ? review.reviewerName[0].toUpperCase()
                       : '?',
-                  style: TextStyle(
+                  style: AppTextStyles.caption.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: Theme.of(context).colorScheme.primary,
-                    fontSize: 14,
+                    color: colorScheme.primary,
                   ),
                 ),
               ),
@@ -488,17 +492,18 @@ class _ReviewCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   review.reviewerName,
-                  style: const TextStyle(
-                      fontSize: 13, fontWeight: FontWeight.w600),
+                  style: textTheme.titleMedium?.copyWith(fontSize: 13),
                 ),
               ),
               Row(
                 children: List.generate(
                   5,
                   (i) => Icon(
-                    i < review.rating ? Icons.star_rounded : Icons.star_outline_rounded,
+                    i < review.rating
+                        ? Icons.star_rounded
+                        : Icons.star_outline_rounded,
                     size: 14,
-                    color: const Color(0xFFFFC107),
+                    color: AppColors.rating,
                   ),
                 ),
               ),
@@ -507,7 +512,10 @@ class _ReviewCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             review.comment,
-            style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+            style: textTheme.bodyLarge?.copyWith(
+              fontSize: 13,
+              color: colorScheme.onSurfaceVariant,
+            ),
           ),
         ],
       ),
@@ -523,6 +531,8 @@ class _AddToCartBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Container(
       padding: EdgeInsets.fromLTRB(
           20, 12, 20, 12 + MediaQuery.of(context).padding.bottom),
@@ -530,7 +540,7 @@ class _AddToCartBar extends StatelessWidget {
         color: colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.07),
+            color: AppColors.cardShadow,
             blurRadius: 20,
             offset: const Offset(0, -4),
           ),
@@ -543,13 +553,13 @@ class _AddToCartBar extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Total Price',
-                  style: TextStyle(
-                      fontSize: 12, color: Colors.grey.shade500)),
+                  style: textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  )),
               Text(
                 '₹${product.discountedPrice.toStringAsFixed(0)}',
-                style: TextStyle(
+                style: AppTextStyles.price.copyWith(
                   fontSize: 20,
-                  fontWeight: FontWeight.w800,
                   color: colorScheme.primary,
                 ),
               ),
@@ -562,31 +572,20 @@ class _AddToCartBar extends StatelessWidget {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: const Text('Added to cart!'),
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
                     margin: const EdgeInsets.all(12),
                     duration: const Duration(seconds: 2),
                   ),
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: colorScheme.primary,
-                foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                elevation: 0,
               ),
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.shopping_bag_outlined, size: 18),
                   SizedBox(width: 8),
-                  Text('Add to Cart',
-                      style: TextStyle(
-                          fontSize: 15, fontWeight: FontWeight.w700)),
+                  Text('Add to Cart', style: AppTextStyles.button),
                 ],
               ),
             ),

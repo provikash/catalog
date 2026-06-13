@@ -47,26 +47,52 @@ class ProductModels {
   double get discountedPrice => price - (price * discountPercentage / 100);
 
   factory ProductModels.fromJson(Map<String, dynamic> json) => ProductModels(
-        id: json['id'] ?? 0,
-        title: json['title'] ?? '',
-        description: json['description'] ?? '',
-        category: json['category'] ?? '',
-        price: (json['price'] ?? 0).toDouble(),
-        discountPercentage: (json['discountPercentage'] ?? 0).toDouble(),
-        rating: (json['rating'] ?? 0).toDouble(),
-        stock: json['stock'] ?? 0,
-        tags: List<String>.from(json['tags'] ?? []),
-        brand: json['brand'] ?? '',
-        sku: json['sku'] ?? '',
-        warrantyInformation: json['warrantyInformation'] ?? '',
-        shippingInformation: json['shippingInformation'] ?? '',
-        availabilityStatus: json['availabilityStatus'] ?? '',
-        reviews: (json['reviews'] as List<dynamic>? ?? [])
-            .map((r) => ReviewModel.fromJson(r))
-            .toList(),
-        returnPolicy: json['returnPolicy'] ?? '',
-        minimumOrderQuantity: json['minimumOrderQuantity'] ?? 1,
-        thumbnail: json['thumbnail'] ?? '',
-        images: List<String>.from(json['images'] ?? []),
-      );
+    id: json['id'] ?? 0,
+    title: json['title'] ?? '',
+    description: json['description'] ?? '',
+    category: json['category'] ?? '',
+    price: (json['price'] ?? 0).toDouble(),
+    discountPercentage: (json['discountPercentage'] ?? 0).toDouble(),
+    rating: (json['rating'] ?? 0).toDouble(),
+    stock: json['stock'] ?? 0,
+    tags: List<String>.from(json['tags'] ?? []),
+    brand: json['brand'] ?? '',
+    sku: json['sku'] ?? '',
+    warrantyInformation: json['warrantyInformation'] ?? '',
+    shippingInformation: json['shippingInformation'] ?? '',
+    availabilityStatus: json['availabilityStatus'] ?? '',
+    reviews: (json['reviews'] as List<dynamic>? ?? [])
+        .map((r) => ReviewModel.fromJson(r))
+        .toList(),
+    returnPolicy: json['returnPolicy'] ?? '',
+    minimumOrderQuantity: json['minimumOrderQuantity'] ?? 1,
+    thumbnail: json['thumbnail'] ?? '',
+    images: List<String>.from(json['images'] ?? []),
+  );
+
+  // tojson for SharedPrepferences
+
+  Map<String, dynamic> tojson() => {
+'id':id,
+'title': title,
+'description': description,
+        'category': category,
+        'price': price,
+        'discountPercentage': discountPercentage,
+        'rating': rating,
+        'stock': stock,
+        'tags': tags,
+        'brand': brand,
+        'sku': sku,
+        'warrantyInformation': warrantyInformation,
+        'shippingInformation': shippingInformation,
+        'availabilityStatus': availabilityStatus,
+        'reviews': reviews.map((r) => r.toJson()).toList(),
+        'returnPolicy': returnPolicy,
+        'minimumOrderQuantity': minimumOrderQuantity,
+        'thumbnail': thumbnail,
+        'images': images,
+
+    
+  };
 }

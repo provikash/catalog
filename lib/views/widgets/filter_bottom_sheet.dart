@@ -1,3 +1,4 @@
+import 'package:catalog/core/themes/theme.dart';
 import 'package:flutter/material.dart';
 
 class FilterBottomSheet extends StatefulWidget {
@@ -37,9 +38,16 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     _priceRange = widget.priceRange;
   }
 
+  void _closeSheet() {
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return Container(
       decoration: BoxDecoration(
@@ -63,7 +71,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: colorScheme.outline,
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
@@ -71,11 +79,15 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
 
           // Header
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Filter Products',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+              Expanded(
+                child: Text(
+                  'Filter Products',
+                  style: textTheme.titleLarge?.copyWith(
+                    fontSize: 18,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
               ),
               TextButton(
                 onPressed: () {
@@ -87,11 +99,22 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 },
                 child: Text(
                   'Reset',
-                  style: TextStyle(
+                  style: AppTextStyles.subtitle.copyWith(
                     color: colorScheme.primary,
-                    fontWeight: FontWeight.w600,
                   ),
                 ),
+              ),
+              IconButton(
+                onPressed: _closeSheet,
+                tooltip: 'Close',
+                style: IconButton.styleFrom(
+                  backgroundColor: colorScheme.surfaceVariant.withOpacity(0.5),
+                  foregroundColor: colorScheme.onSurface,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: const Icon(Icons.close_rounded, size: 20),
               ),
             ],
           ),
@@ -99,9 +122,12 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           const SizedBox(height: 20),
 
           // Category Section
-          const Text(
+          Text(
             'Category',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+            style: textTheme.titleLarge?.copyWith(
+              fontSize: 14,
+              color: colorScheme.onSurface,
+            ),
           ),
           const SizedBox(height: 12),
           SizedBox(
@@ -137,11 +163,11 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                     ),
                     child: Text(
                       _capitalize(cat),
-                      style: TextStyle(
+                      style: AppTextStyles.caption.copyWith(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                         color: isSelected
-                            ? Colors.white
+                            ? colorScheme.onPrimary
                             : colorScheme.onSurface,
                       ),
                     ),
@@ -157,13 +183,16 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Price Range',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                style: textTheme.titleLarge?.copyWith(
+                  fontSize: 14,
+                  color: colorScheme.onSurface,
+                ),
               ),
               Text(
                 '₹${_priceRange.start.toStringAsFixed(0)} – ₹${_priceRange.end.toStringAsFixed(0)}',
-                style: TextStyle(
+                style: AppTextStyles.caption.copyWith(
                   fontSize: 13,
                   color: colorScheme.primary,
                   fontWeight: FontWeight.w600,
@@ -195,11 +224,13 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('₹0',
-                  style: TextStyle(
-                      fontSize: 12, color: Colors.grey.shade500)),
+                  style: AppTextStyles.caption.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  )),
               Text('₹${widget.maxPrice.toStringAsFixed(0)}',
-                  style: TextStyle(
-                      fontSize: 12, color: Colors.grey.shade500)),
+                  style: AppTextStyles.caption.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  )),
             ],
           ),
 
@@ -211,20 +242,14 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             child: ElevatedButton(
               onPressed: () {
                 widget.onApply();
-                Navigator.pop(context);
+                _closeSheet();
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: colorScheme.primary,
-                foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                elevation: 0,
               ),
               child: const Text(
                 'Apply Filters',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                style: AppTextStyles.button,
               ),
             ),
           ),

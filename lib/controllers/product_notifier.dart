@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -6,6 +7,7 @@ import '../core/network/dio_client.dart';
 import '../services/api_service.dart';
 import '../models/product_models.dart';
 import 'product_state.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // ─────────────────────────────────────────
 //  Provider
@@ -25,7 +27,11 @@ class ProductNotifier extends Notifier<ProductState> {
   Timer? _debounce;
 
   @override
-  ProductState build() => const ProductState();
+  ProductState build() {
+    _clearOldWishlist();
+    _loadWishlist();
+    return const ProductState();
+  }
 
   // ── 1. Initial Load ───────────────────
   Future<void> loadProducts() async {
@@ -40,10 +46,7 @@ class ProductNotifier extends Notifier<ProductState> {
     );
 
     try {
-      final response = await _apiService.getProducts(
-        limit: _limit,
-        skip: 0,
-      );
+      final response = await _apiService.getProducts(limit: _limit, skip: 0);
 
       state = state.copyWith(
         isLoading: false,
@@ -53,16 +56,12 @@ class ProductNotifier extends Notifier<ProductState> {
       );
     } catch (e) {
       debugPrint('❌ loadProducts error: $e');
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 
   // ── 2. Load More (pagination) ─────────
   Future<void> loadMore() async {
-    // guard: don't load if already loading or no more data
     if (state.isLoadingMore || !state.hasMore || state.isLoading) return;
     // guard: don't paginate during search or category filter
     if (state.searchQuery.isNotEmpty || state.selectedCategory != null) return;
@@ -85,10 +84,7 @@ class ProductNotifier extends Notifier<ProductState> {
       );
     } catch (e) {
       debugPrint('❌ loadMore error: $e');
-      state = state.copyWith(
-        isLoadingMore: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isLoadingMore: false, error: e.toString());
     }
   }
 
@@ -125,10 +121,7 @@ class ProductNotifier extends Notifier<ProductState> {
       );
     } catch (e) {
       debugPrint('❌ search error: $e');
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 
@@ -159,10 +152,7 @@ class ProductNotifier extends Notifier<ProductState> {
       );
     } catch (e) {
       debugPrint('❌ filterByCategory error: $e');
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 
@@ -182,49 +172,102 @@ class ProductNotifier extends Notifier<ProductState> {
     await loadProducts();
   }
 
-
   Future<void> filterByPrice(double min, double max) async {
-  state = state.copyWith(
-    isLoading: true,
-    error: null,
-    minPrice: min,
-    maxPrice: max,
-  );
-
-  try {
-    final response = await _apiService.getProducts(
-      limit: _limit,
-      skip: 0,
-    );
-
-    // filter locally after fetch
-    final filtered = response.products
-        .where((p) => p.price >= min && p.price <= max)
-        .toList();
-
     state = state.copyWith(
-      isLoading: false,
-      products: filtered,
-      hasMore: false,
+      isLoading: true,
+      error: null,
+      minPrice: min,
+      maxPrice: max,
     );
-  } catch (e) {
-    state = state.copyWith(isLoading: false, error: e.toString());
+
+    try {
+      final response = await _apiService.getProducts(limit: _limit, skip: 0);
+
+      // filter locally after fetch
+      final filtered = response.products
+          .where((p) => p.price >= min && p.price <= max)
+          .toList();
+
+      state = state.copyWith(
+        isLoading: false,
+        products: filtered,
+        hasMore: false,
+      );
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+    }
   }
-}
 
   // ── 7. Toggle Wishlist ────────────────
-void toggleWishlist(ProductModels product) {
-  final current = [...state.wishlistedProducts];
-  final exists = current.any((p) => p.id == product.id);
+  void toggleWishlist(ProductModels product) {
+    final current = [...state.wishlistedProducts];
+    final exists = current.any((p) => p.id == product.id);
 
-  if (exists) {
-    current.removeWhere((p) => p.id == product.id);
-  } else {
-    current.add(product);
+    if (exists) {
+      current.removeWhere((p) => p.id == product.id);
+    } else {
+      current.add(product);
+    }
+
+    state = state.copyWith(wishlistedProducts: current);
+    _saveWishlist(current);
   }
 
-  state = state.copyWith(wishlistedProducts: current);
-}
-}
+  // -- 8. Wishlist save to Local storage
 
+  Future<void> _saveWishlist(List<ProductModels> products) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
 
+      final jsonList = products
+          .map((p) => jsonEncode(p.tojson())) // ✅ each product → JSON string
+          .toList();
+
+      await prefs.setStringList('wishlistKey', jsonList);
+      debugPrint('✅ Saved ${products.length} wishlist items');
+    } catch (e) {
+      debugPrint('❌ Failed to save wishlist: $e');
+    }
+  }
+
+  Future<void> _loadWishlist() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final jsonList = prefs.getStringList('wishlistKey') ?? [];
+
+      final products = <ProductModels>[];
+
+      for (final jsonStr in jsonList) {
+        try {
+          final decoded = jsonDecode(jsonStr);
+          // ✅ skip if it's not a Map (old format — plain IDs)
+          if (decoded is! Map<String, dynamic>) {
+            debugPrint('⚠️ Skipping invalid wishlist entry: $decoded');
+            continue;
+          }
+          products.add(ProductModels.fromJson(decoded));
+        } catch (e) {
+          debugPrint('⚠️ Skipping corrupt entry: $e');
+          continue; // skip bad entries, don't crash
+        }
+      }
+
+      // ✅ if old format detected, clear and start fresh
+      if (products.isEmpty && jsonList.isNotEmpty) {
+        debugPrint('🧹 Clearing old wishlist format');
+        await prefs.remove('wishlistKey');
+      }
+
+      debugPrint('✅ Loaded ${products.length} wishlist items');
+      state = state.copyWith(wishlistedProducts: products);
+    } catch (e) {
+      debugPrint('❌ Failed to load wishlist: $e');
+    }
+  }
+
+  Future<void> _clearOldWishlist() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('wishlist_products');
+    debugPrint('🧹 Old wishlist cleared');
+  }
+}

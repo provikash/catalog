@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:catalog/core/themes/theme.dart';
 import 'package:flutter/material.dart';
 
 class ProductSearchBar extends StatefulWidget {
@@ -52,6 +53,7 @@ class _ProductSearchBarState extends State<ProductSearchBar> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return Row(
       children: [
@@ -71,17 +73,20 @@ class _ProductSearchBarState extends State<ProductSearchBar> {
             child: TextField(
               controller: _controller,
               onChanged: _onChanged,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+              style: textTheme.bodyLarge?.copyWith(
+                color: colorScheme.onSurface,
+                fontWeight: FontWeight.w500,
+              ),
               decoration: InputDecoration(
                 hintText: widget.hintText,
-                hintStyle: TextStyle(
-                  color: Colors.grey.shade500,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
+                hintStyle: AppTextStyles.body.copyWith(
+                  color: colorScheme.onSurfaceVariant,
                 ),
                 prefixIcon: Icon(
                   Icons.search_rounded,
-                  color: _hasText ? colorScheme.primary : Colors.grey.shade500,
+                  color: _hasText
+                      ? colorScheme.primary
+                      : colorScheme.onSurfaceVariant,
                   size: 22,
                 ),
                 suffixIcon: _hasText
@@ -89,7 +94,7 @@ class _ProductSearchBarState extends State<ProductSearchBar> {
                         onTap: _clear,
                         child: Icon(
                           Icons.cancel_rounded,
-                          color: Colors.grey.shade500,
+                          color: colorScheme.onSurfaceVariant,
                           size: 20,
                         ),
                       )
@@ -122,9 +127,9 @@ class _ProductSearchBarState extends State<ProductSearchBar> {
                 ),
               ],
             ),
-            child: const Icon(
+            child: Icon(
               Icons.tune_rounded,
-              color: Colors.white,
+              color: colorScheme.onPrimary,
               size: 22,
             ),
           ),

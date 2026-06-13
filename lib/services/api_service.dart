@@ -1,6 +1,6 @@
+import 'dart:convert';
 import 'package:dio/dio.dart';
-import 'package:flutter/widgets.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/product_response.dart';
 import '../core/constants/api_constants.dart';
 import '../models/category_model.dart';
@@ -10,28 +10,48 @@ class ApiService {
 
   ApiService(this.dio);
 
+  // Future<ProductResponse> getProducts({int limit = 20, int skip = 0}) async {
+  //   try {
+  //     // debugPrint('=================================');
+
+  //     // debugPrint('BASE URL  : ${dio.options.baseUrl}');
+  //     // debugPrint('ENDPOINT  : ${ApiConstants.products}');
+  //     // debugPrint('FULL URL  : ${dio.options.baseUrl}${ApiConstants.products}');
+
+  //     // debugPrint('=================================');
+
+  //     final response = await dio.get(
+  //       ApiConstants.products,
+  //       queryParameters: {'limit': limit, 'skip': skip},
+  //     );
+  //     final result = ProductResponse.fromJson(response.data);
+
+  //     return result;
+  //   } on DioException catch (e) {
+  //     final box = Hive.box('product_cache');
+  //     final cached = box.get('products_$skip');
+
+  //     if (cached != null) {
+  //       return ProductResponse.fromJson(cached);
+  //     }
+  //     throw Exception(e.message ?? 'Failed to fetch products');
+  //   }
+  // }
+
   Future<ProductResponse> getProducts({int limit = 20, int skip = 0}) async {
     try {
-      debugPrint('=================================');
-
-    debugPrint('BASE URL  : ${dio.options.baseUrl}');
-    debugPrint('ENDPOINT  : ${ApiConstants.products}');
-    debugPrint('FULL URL  : ${dio.options.baseUrl}${ApiConstants.products}');
-
-      
-
-      debugPrint('=================================');
       final response = await dio.get(
         ApiConstants.products,
         queryParameters: {'limit': limit, 'skip': skip},
       );
 
-      print(response);
-      print(ApiConstants.products);
+      final prefs = await SharedPreferences.getInstance();
+
+      await prefs.setString('products_$skip', jsonEncode(response.data));
 
       return ProductResponse.fromJson(response.data);
     } on DioException catch (e) {
-      throw Exception(e.message ?? 'Failed to fetch products');
+      throw Exception(e.message ?? 'Failed to fetch');
     }
   }
 

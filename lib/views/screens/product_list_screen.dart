@@ -256,7 +256,7 @@ class _ProductGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ✅ fixed: show empty only when NOT loading
+
     if (products.isEmpty && !isInitialLoading) {
       return const _EmptyView();
     }
@@ -275,7 +275,7 @@ class _ProductGrid extends StatelessWidget {
                   
                   
                   isLoading: isInitialLoading,
-                  // ✅ fixed: wishlisted.contains returns bool, not bool?
+                 
                   isWishlisted: product != null && wishlisted.contains(product.id),
                   onTap: product != null ? () => onTap(product) : null,
                   onWishlistTap: product != null ? () => onWishlistTap(product) : null,
@@ -291,7 +291,7 @@ class _ProductGrid extends StatelessWidget {
             ),
           ),
         ),
-        // ✅ fixed: isLoadingMore is bool not bool?
+        //
         if (isLoadingMore)
           const SliverToBoxAdapter(
             child: Padding(

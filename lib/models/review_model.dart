@@ -20,4 +20,13 @@ class ReviewModel {
         reviewerName: json['reviewerName'] ?? '',
         reviewerEmail: json['reviewerEmail'] ?? '',
       );
+
+
+  Map<String, dynamic> toJson() => {
+        'rating': rating,
+        'comment': comment,
+        'date': date,
+        'reviewerName': reviewerName,
+        'reviewerEmail': reviewerEmail,
+      };
 }
