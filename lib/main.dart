@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: ThemeMode.system,
-      debugShowCheckedModeBanner: false,
+      // debugShowCheckedModeBanner: false,
       title: 'Catalog',
       home: Scaffold(
         appBar: AppBar(title: const Text('Catalog'),),
