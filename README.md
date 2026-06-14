@@ -6,7 +6,7 @@ A modern Flutter e-commerce product explorer app built as part of an internship 
 
 ## 📱 Download APK
 
-> **[⬇️ Download Latest APK](https://github.com/provikash/catalog/main/build/app/outputs/flutter-apk/app-release.apk)**
+> **[⬇️ Download Latest APK](https://github.com/provikash/catalog/raw/main/Tools/apk/app-release.apk)**
 
 ---
 
@@ -30,11 +30,12 @@ A modern Flutter e-commerce product explorer app built as part of an internship 
 
 ## 📸 Screenshots
 
-> Add screenshots here after recording
-
-| Product List | Product Detail | Wishlist |
+| | | |
 |---|---|---|
-| ![list](screenshots/list.png) | ![detail](screenshots/detail.png) | ![wishlist](screenshots/wishlist.png) |
+| ![1](Tools/screenshots/1.jpg) | ![2](Tools/screenshots/2.jpg) | ![3](Tools/screenshots/3.jpg) |
+| ![4](Tools/screenshots/4.jpg) | ![5](Tools/screenshots/5.jpg) | ![6](Tools/screenshots/6.jpg) |
+| ![7](Tools/screenshots/7.jpg) | ![8](Tools/screenshots/8.jpg) | ![9](Tools/screenshots/9.jpg) |
+| ![10](Tools/screenshots/10.jpg) | ![11](Tools/screenshots/11.jpg) | ![12](Tools/screenshots/12.jpg) |
 
 ---
 
@@ -75,7 +76,7 @@ lib/
 │       └── theme.dart            # AppColors, AppTextStyles, AppTheme
 │
 └── views/
-    ├── screens/
+    └── screens/
         ├── product_list/
         │   ├── product_list_screen.dart
         │   └── widgets/
@@ -94,7 +95,12 @@ lib/
         │       └── review_card.dart
         └── wishlist/
             └── wishlist_screen.dart
-    
+
+Tools/
+├── apk/
+│   └── app-release.apk           # Latest release build
+└── screenshots/
+    └── 1.jpg … 12.jpg            # App screenshots
 ```
 
 ---
@@ -132,8 +138,8 @@ dependencies:
 ### Prerequisites
 - Flutter SDK `>=3.0.0`
 - Dart SDK `>=3.0.0`
-- VS Code
-- Physical Device
+- Android Studio / VS Code
+- Android Emulator or Physical Device
 
 ### Steps
 
@@ -154,9 +160,6 @@ flutter run
 ### Build APK
 
 ```bash
-# Debug APK
-flutter build apk --debug
-
 # Release APK
 flutter build apk --release
 
@@ -190,7 +193,7 @@ Timer(const Duration(milliseconds: 350), () => _executeSearch(query));
 
 ### Infinite Scroll Pagination
 ```dart
-// Triggers 300px before bottom
+// Triggers 300px before reaching bottom
 if (pixels >= maxExtent - 300) loadMore();
 ```
 
@@ -206,14 +209,35 @@ if (cached != null) return ProductResponse.fromJson(jsonDecode(cached));
 
 ### Wishlist Persistence
 ```dart
-// Converts full product to JSON and saves to SharedPreferences
-// Reloads on app start via build() in NotifierProvider
+// Converts full product to JSON → saves to SharedPreferences
+// Reloads automatically on app start via build() in NotifierProvider
 ```
 
 ### Hero Animation
 ```dart
-// Same tag on list card and detail screen
+// Same tag on list card and detail screen → Flutter animates automatically
 Hero(tag: 'product-image-${product.id}', child: CachedNetworkImage(...))
+```
+
+### Heart Bounce + Floating Heart
+```dart
+// Bounce: scale 1.0 → 1.5 → 0.85 → 1.0
+// Float: heart rises and fades away on wishlist tap
+TweenSequence<double>([...]).animate(_heartController);
+```
+
+---
+
+## 📁 Assignment Structure
+
+```
+catalog/
+├── lib/                  # Part 1 — Flutter Product Explorer App
+├── Part 2/               # Part 2 solution
+├── Part 3/               # Part 3 solution
+└── Tools/
+    ├── apk/              # Release APK
+    └── screenshots/      # App screenshots
 ```
 
 ---
