@@ -2,7 +2,7 @@ import 'package:catalog/core/themes/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import '../../models/product_models.dart';
+import '../../../../models/product_models.dart';
 
 class ProductCard extends StatefulWidget {
   final ProductModels? product;
@@ -26,7 +26,7 @@ class ProductCard extends StatefulWidget {
 
 class _ProductCardState extends State<ProductCard>
     with TickerProviderStateMixin {
-  // ✅ changed from SingleTicker
+
 
   // ── Tap scale ──
   late AnimationController _tapController;
@@ -134,11 +134,13 @@ class _ProductCardState extends State<ProductCard>
               Transform.scale(scale: _scaleAnimation.value, child: child),
           child: Container(
             decoration: BoxDecoration(
-              color: colorScheme.surface,
+              color: colorScheme.surfaceContainerHighest,
+              
               borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: colorScheme.outline.withValues(alpha: 0.3)),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.06),
+                  color: Colors.black.withValues(alpha: 0.15),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -154,7 +156,7 @@ class _ProductCardState extends State<ProductCard>
                       margin: const EdgeInsets.all(8),
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
+                        color: colorScheme.surface,
                         borderRadius: BorderRadius.circular(14),
                       ),
 
@@ -165,27 +167,29 @@ class _ProductCardState extends State<ProductCard>
                         child: AspectRatio(
                           aspectRatio: 1,
                           child: widget.isLoading
-                              ? Container(color: Colors.grey.shade200)
+                              ? Container(color:Theme.of(context).colorScheme.surfaceContainerHighest)
                               : Hero(
                                   tag: 'product-image-${widget.product?.id}',
                                   child: CachedNetworkImage(
                                     imageUrl: widget.product?.thumbnail ?? '',
                                     fit: BoxFit.cover,
-                                    placeholder: (_, __) => Container(
-                                      color: Colors.grey.shade400,
-                                      child: const Center(
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
+                                    placeholder: (context, progress) =>
+                                        Container(
+                                          color: colorScheme.surfaceContainerHighest,
+                                          child: const Center(
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                    ),
-                                    errorWidget: (_, __, ___) => Container(
-                                      color: Colors.grey.shade100,
-                                      child: const Icon(
-                                        Icons.image_not_supported,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
+                                    errorWidget: (context, error, stackTrace) =>
+                                        Container(
+                                          color: colorScheme.surfaceContainerHighest,
+                                          child:  Icon(
+                                            Icons.image_not_supported,
+                                            color: colorScheme.onSurfaceVariant,
+                                          ),
+                                        ),
                                   ),
                                 ),
                         ),
@@ -210,7 +214,7 @@ class _ProductCardState extends State<ProductCard>
                           child: Text(
                             '-${widget.product!.discountPercentage.toStringAsFixed(0)}%',
                             style: AppTextStyles.caption.copyWith(
-                              color: Colors.white,
+                              color: colorScheme.surface,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -232,11 +236,11 @@ class _ProductCardState extends State<ProductCard>
                           child: Container(
                             padding: const EdgeInsets.all(6),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: colorScheme.surface,
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
+                                  color: Colors.black.withValues(alpha: 0.1),
                                   blurRadius: 6,
                                 ),
                               ],
@@ -253,7 +257,7 @@ class _ProductCardState extends State<ProductCard>
                                 size: 18,
                                 color: widget.isWishlisted
                                     ? AppColors.accent
-                                    : Colors.grey,
+                                    : colorScheme.onSurfaceVariant,
                               ),
                             ),
                           ),
@@ -338,17 +342,9 @@ class _ProductCardState extends State<ProductCard>
                                 decoration: TextDecoration.lineThrough,
                               ),
                             ),
-
-                          
                         ],
                       ),
-
-                     
-                   
-                    
                     ],
-
-                    
                   ),
                 ),
               ],

@@ -10,6 +10,7 @@ class ProductState {
   final String? error;
   final String searchQuery;
   final String? selectedCategory;
+  final int selectedImageIndex;
 
   final int skip;
   final bool hasMore;
@@ -23,6 +24,9 @@ class ProductState {
   const ProductState({
     this.products = const [],
     this.categories = const [],
+
+    this.selectedImageIndex = 0,
+
     this.isLoading = false,
     this.isLoadingMore = false,
     this.error,
@@ -37,8 +41,7 @@ class ProductState {
   });
 
   // Computed helpers
-  Set<int> get wishlistedIds =>
-      wishlistedProducts.map((p) => p.id).toSet();
+  Set<int> get wishlistedIds => wishlistedProducts.map((p) => p.id).toSet();
 
   int get wishlistCount => wishlistedProducts.length;
   int get totalCount => products.length;
@@ -51,6 +54,7 @@ class ProductState {
   ProductState copyWith({
     List<ProductModels>? products,
     List<CategoryModel>? categories,
+    int? selectedImageIndex,
     bool? isLoading,
     bool? isLoadingMore,
     String? error,
@@ -70,11 +74,14 @@ class ProductState {
       products: products ?? this.products,
       categories: categories ?? this.categories,
       isLoading: isLoading ?? this.isLoading,
+      selectedImageIndex: selectedImageIndex ?? this.selectedImageIndex,
+
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       error: clearError ? null : error ?? this.error,
       searchQuery: clearSearch ? '' : searchQuery ?? this.searchQuery,
-      selectedCategory:
-          clearCategory ? null : selectedCategory ?? this.selectedCategory,
+      selectedCategory: clearCategory
+          ? null
+          : selectedCategory ?? this.selectedCategory,
       skip: skip ?? this.skip,
       hasMore: hasMore ?? this.hasMore,
       wishlistedProducts: wishlistedProducts ?? this.wishlistedProducts,

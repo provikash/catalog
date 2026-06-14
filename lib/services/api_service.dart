@@ -10,34 +10,6 @@ class ApiService {
 
   ApiService(this.dio);
 
-  // Future<ProductResponse> getProducts({int limit = 20, int skip = 0}) async {
-  //   try {
-  //     // debugPrint('=================================');
-
-  //     // debugPrint('BASE URL  : ${dio.options.baseUrl}');
-  //     // debugPrint('ENDPOINT  : ${ApiConstants.products}');
-  //     // debugPrint('FULL URL  : ${dio.options.baseUrl}${ApiConstants.products}');
-
-  //     // debugPrint('=================================');
-
-  //     final response = await dio.get(
-  //       ApiConstants.products,
-  //       queryParameters: {'limit': limit, 'skip': skip},
-  //     );
-  //     final result = ProductResponse.fromJson(response.data);
-
-  //     return result;
-  //   } on DioException catch (e) {
-  //     final box = Hive.box('product_cache');
-  //     final cached = box.get('products_$skip');
-
-  //     if (cached != null) {
-  //       return ProductResponse.fromJson(cached);
-  //     }
-  //     throw Exception(e.message ?? 'Failed to fetch products');
-  //   }
-  // }
-
   Future<ProductResponse> getProducts({int limit = 20, int skip = 0}) async {
     try {
       final response = await dio.get(
@@ -51,7 +23,20 @@ class ApiService {
 
       return ProductResponse.fromJson(response.data);
     } on DioException catch (e) {
+   
+
+      //  load from cache
+      final prefs = await SharedPreferences.getInstance();
+      final cached = prefs.getString('products_$skip');
+
+      if (cached != null) {
+
+       
+        return ProductResponse.fromJson(jsonDecode(cached));
+      }
+     
       throw Exception(e.message ?? 'Failed to fetch');
+      
     }
   }
 
@@ -91,4 +76,6 @@ class ApiService {
       throw Exception(e.message ?? 'Failed to search products');
     }
   }
+
+
 }

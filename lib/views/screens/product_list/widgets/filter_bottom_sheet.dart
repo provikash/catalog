@@ -108,7 +108,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 onPressed: _closeSheet,
                 tooltip: 'Close',
                 style: IconButton.styleFrom(
-                  backgroundColor: colorScheme.surfaceVariant.withOpacity(0.5),
+                  backgroundColor: colorScheme.surfaceContainerHighest
+                      .withValues(alpha: 0.5),
                   foregroundColor: colorScheme.onSurface,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -135,7 +136,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: widget.categories.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              separatorBuilder: (context, index) => const SizedBox(width: 8),
               itemBuilder: (context, index) {
                 final cat = widget.categories[index];
                 final isSelected = _selectedCategory == cat;
@@ -149,11 +150,15 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 180),
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 8),
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       color: isSelected
                           ? colorScheme.primary
-                          : colorScheme.surfaceVariant.withOpacity(0.5),
+                          : colorScheme.surfaceContainerHighest.withValues(
+                              alpha: 0.5,
+                            ),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: isSelected
@@ -204,9 +209,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
               activeTrackColor: colorScheme.primary,
-              inactiveTrackColor: colorScheme.surfaceVariant,
+              inactiveTrackColor: colorScheme.surfaceContainerHighest,
               thumbColor: colorScheme.primary,
-              overlayColor: colorScheme.primary.withOpacity(0.15),
+              overlayColor: colorScheme.primary.withValues(alpha: 0.15),
               trackHeight: 4,
             ),
             child: RangeSlider(
@@ -223,14 +228,18 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('₹0',
-                  style: AppTextStyles.caption.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  )),
-              Text('₹${widget.maxPrice.toStringAsFixed(0)}',
-                  style: AppTextStyles.caption.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  )),
+              Text(
+                '₹0',
+                style: AppTextStyles.caption.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+              Text(
+                '₹${widget.maxPrice.toStringAsFixed(0)}',
+                style: AppTextStyles.caption.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
             ],
           ),
 
@@ -247,10 +256,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
-              child: const Text(
-                'Apply Filters',
-                style: AppTextStyles.button,
-              ),
+              child: const Text('Apply Filters', style: AppTextStyles.button),
             ),
           ),
         ],

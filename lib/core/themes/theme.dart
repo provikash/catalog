@@ -8,35 +8,34 @@ class AppColors {
   AppColors._();
 
   // Primary
-  static const primary      = Color(0xFF5C6BC0);
+  static const primary = Color(0xFF5C6BC0);
   static const primaryLight = Color(0xFF8E99F3);
-  static const primaryDark  = Color(0xFF26418F);
+  static const primaryDark = Color(0xFF26418F);
 
   // Accent
   static const accent = Color(0xFFFF6F61);
 
   // Light surface
-  static const backgroundLight    = Color(0xFFF6F7FB);
-  static const surfaceLight       = Color(0xFFFFFFFF);
+  static const backgroundLight = Color(0xFFF6F7FB);
+  static const surfaceLight = Color(0xFFFFFFFF);
   static const surfaceVariantLight = Color(0xFFEEEFF5);
-  static const onBackgroundLight  = Color(0xFF1A1C2E);
-  static const onSurfaceLight     = Color(0xFF2D2F45);
+  static const onBackgroundLight = Color(0xFF1A1C2E);
+  static const onSurfaceLight = Color(0xFF2D2F45);
 
   // Dark surface
-  static const backgroundDark    = Color(0xFF12131C);
-  static const surfaceDark       = Color(0xFF1E2030);
-  static const surfaceVariantDark = Color(0xFF2A2D3E);
-  static const onBackgroundDark  = Color(0xFFF0F1FA);
-  static const onSurfaceDark     = Color(0xFFDEDFF0);
+static const backgroundDark = Color(0xFF0F1117);
+static const surfaceDark = Color(0xFF1B2030);
+static const surfaceVariantDark = Color(0xFF2B3145);
+
+static const onBackgroundDark = Color(0xFFFFFFFF);
+static const onSurfaceDark = Color(0xFFF5F7FF);
 
   // Semantic
   static const success = Color(0xFF4CAF50);
   static const warning = Color(0xFFFFC107);
-  static const error   = Color(0xFFEF5350);
+  static const error = Color(0xFFEF5350);
 
- 
-
-   // Product Card
+  // Product Card
   static const Color imageBackground = Color(0xFFF8F9FC);
 
   static const Color imageBorder = Color(0xFFE8EAF3);
@@ -71,10 +70,7 @@ class AppTextStyles {
     letterSpacing: -0.2,
   );
 
-  static const subtitle = TextStyle(
-    fontSize: 14,
-    fontWeight: FontWeight.w600,
-  );
+  static const subtitle = TextStyle(fontSize: 14, fontWeight: FontWeight.w600);
 
   static const body = TextStyle(
     fontSize: 14,
@@ -121,10 +117,8 @@ class AppTheme {
       onSecondaryContainer: Color(0xFF8B1A10),
       surface: AppColors.surfaceLight,
       onSurface: AppColors.onSurfaceLight,
-      surfaceVariant: AppColors.surfaceVariantLight,
+      surfaceContainerHighest: AppColors.surfaceVariantLight,
       onSurfaceVariant: Color(0xFF5A5C72),
-      background: AppColors.backgroundLight,
-      onBackground: AppColors.onBackgroundLight,
       error: AppColors.error,
       onError: Colors.white,
       outline: Color(0xFFD0D1E0),
@@ -137,7 +131,7 @@ class AppTheme {
 
       // ── AppBar ──
       appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.backgroundLight,
+        backgroundColor: AppColors.surfaceLight,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
@@ -157,9 +151,7 @@ class AppTheme {
       cardTheme: CardThemeData(
         color: AppColors.surfaceLight,
         elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         margin: EdgeInsets.zero,
       ),
 
@@ -243,9 +235,7 @@ class AppTheme {
         selectedColor: AppColors.primary,
         labelStyle: AppTextStyles.caption,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         side: BorderSide.none,
       ),
 
@@ -266,12 +256,12 @@ class AppTheme {
 
       // ── Text ──
       textTheme: const TextTheme(
-        headlineLarge:  AppTextStyles.heading,
-        titleLarge:     AppTextStyles.title,
-        titleMedium:    AppTextStyles.subtitle,
-        bodyLarge:      AppTextStyles.body,
-        bodySmall:      AppTextStyles.caption,
-        labelLarge:     AppTextStyles.button,
+        headlineLarge: AppTextStyles.heading,
+        titleLarge: AppTextStyles.title,
+        titleMedium: AppTextStyles.subtitle,
+        bodyLarge: AppTextStyles.body,
+        bodySmall: AppTextStyles.caption,
+        labelLarge: AppTextStyles.button,
       ),
     );
   }
@@ -290,10 +280,8 @@ class AppTheme {
       onSecondaryContainer: Color(0xFFFFCDC9),
       surface: AppColors.surfaceDark,
       onSurface: AppColors.onSurfaceDark,
-      surfaceVariant: AppColors.surfaceVariantDark,
+      surfaceContainerHighest: AppColors.surfaceVariantDark,
       onSurfaceVariant: Color(0xFF9B9DB8),
-      background: AppColors.backgroundDark,
-      onBackground: AppColors.onBackgroundDark,
       error: AppColors.error,
       onError: Colors.white,
       outline: Color(0xFF3A3D55),
@@ -305,7 +293,7 @@ class AppTheme {
       scaffoldBackgroundColor: AppColors.backgroundDark,
 
       appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.backgroundDark,
+        backgroundColor: AppColors.surfaceDark,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
@@ -324,9 +312,7 @@ class AppTheme {
       cardTheme: CardThemeData(
         color: AppColors.surfaceDark,
         elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         margin: EdgeInsets.zero,
       ),
 
@@ -363,8 +349,10 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide:
-              const BorderSide(color: AppColors.primaryLight, width: 1.5),
+          borderSide: const BorderSide(
+            color: AppColors.primaryLight,
+            width: 1.5,
+          ),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
@@ -390,9 +378,7 @@ class AppTheme {
         selectedColor: AppColors.primaryLight,
         labelStyle: AppTextStyles.caption,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         side: BorderSide.none,
       ),
 
@@ -404,20 +390,20 @@ class AppTheme {
 
       snackBarTheme: SnackBarThemeData(
         backgroundColor: AppColors.surfaceVariantDark,
-        contentTextStyle:
-            AppTextStyles.body.copyWith(color: AppColors.onSurfaceDark),
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        contentTextStyle: AppTextStyles.body.copyWith(
+          color: AppColors.onSurfaceDark,
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         behavior: SnackBarBehavior.floating,
       ),
 
       textTheme: const TextTheme(
         headlineLarge: AppTextStyles.heading,
-        titleLarge:    AppTextStyles.title,
-        titleMedium:   AppTextStyles.subtitle,
-        bodyLarge:     AppTextStyles.body,
-        bodySmall:     AppTextStyles.caption,
-        labelLarge:    AppTextStyles.button,
+        titleLarge: AppTextStyles.title,
+        titleMedium: AppTextStyles.subtitle,
+        bodyLarge: AppTextStyles.body,
+        bodySmall: AppTextStyles.caption,
+        labelLarge: AppTextStyles.button,
       ),
     );
   }

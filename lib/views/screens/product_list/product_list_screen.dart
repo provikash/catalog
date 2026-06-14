@@ -1,15 +1,16 @@
 import 'package:catalog/core/themes/theme.dart';
-import 'package:catalog/views/screens/wishlist_screen.dart';
+import 'package:catalog/views/screens/product_list/widgets/error_view.dart';
+import 'package:catalog/views/screens/product_list/widgets/filter_chip.dart';
+import 'package:catalog/views/screens/product_list/widgets/product_grid.dart';
+import 'package:catalog/views/screens/wishlist/wishlist_screen.dart';
+import 'package:catalog/views/screens/product_list/widgets/search_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../controllers/product_notifier.dart';
-import '../../models/product_models.dart';
+import '../../../controllers/product_notifier.dart';
 
-import '../widgets/product_card.dart';
-import '../widgets/search_bar.dart';
-import '../widgets/filter_bottom_sheet.dart';
-import 'product_detail_screen.dart';
+import 'widgets/filter_bottom_sheet.dart';
+import '../product_detail/product_detail_screen.dart';
 
 class ProductListScreen extends ConsumerStatefulWidget {
   const ProductListScreen({super.key});
@@ -59,7 +60,9 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
           ref.read(productProvider.notifier).filterByCategory(cat);
         },
         onPriceRangeChanged: (range) {
-          ref.read(productProvider.notifier).filterByPrice(range.start, range.end);
+          ref
+              .read(productProvider.notifier)
+              .filterByPrice(range.start, range.end);
         },
         onApply: () {},
         onReset: () {
@@ -75,7 +78,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: colorScheme.background,
+      backgroundColor: colorScheme.surface,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -95,7 +98,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                           Text(
                             'Discover',
                             style: AppTextStyles.heading.copyWith(
-                              color: colorScheme.onBackground,
+                              color: colorScheme.onSurface,
                             ),
                           ),
                           Text(
@@ -107,11 +110,17 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
 
                       // Wishlist icon
                       GestureDetector(
-                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_)=> const WishlistScreen())),
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const WishlistScreen(),
+                          ),
+                        ),
                         child: Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: colorScheme.surfaceVariant.withOpacity(0.5),
+                            color: colorScheme.surfaceContainerHighest
+                                .withValues(alpha: 0.5),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Stack(
@@ -168,7 +177,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                       child: Row(
                         children: [
                           if (state.selectedCategory != null)
-                            _FilterChip(
+                            ActiveFilterChip(
                               label: state.selectedCategory!,
                               onRemove: () => ref
                                   .read(productProvider.notifier)
@@ -176,7 +185,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                             ),
                           if (state.minPrice > 0 ||
                               state.maxPrice < state.absoluteMaxPrice)
-                            _FilterChip(
+                            ActiveFilterChip(
                               label:
                                   '₹${state.minPrice.toStringAsFixed(0)}–₹${state.maxPrice.toStringAsFixed(0)}',
                               onRemove: () => ref
@@ -194,18 +203,18 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
             // ── Content ─────────────────────────
             Expanded(
               child: state.error != null
-                  ? _ErrorView(
+                  ? ErrorView(
                       message: state.error!,
                       onRetry: () =>
                           ref.read(productProvider.notifier).loadProducts(),
                     )
-                  : _ProductGrid(
+                  : ProductGrid(
                       products: state.isLoading && state.products.isEmpty
-                          ? List.generate(10, (_) => null)
+                          ? List.generate(10, (index) => null)
                           : state.products,
-                      
-              
-                      isInitialLoading: state.isLoading && state.products.isEmpty,
+
+                      isInitialLoading:
+                          state.isLoading && state.products.isEmpty,
                       isLoadingMore: state.isLoadingMore,
                       scrollController: _scrollController,
                       wishlisted: state.wishlistedIds,
@@ -213,197 +222,17 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => ProductDetailScreen(product: product),
+                            builder: (_) =>
+                                ProductDetailScreen(product: product),
                           ),
                         );
                       },
                       onWishlistTap: (product) {
-                        ref.read(productProvider.notifier).toggleWishlist(product);
+                        ref
+                            .read(productProvider.notifier)
+                            .toggleWishlist(product);
                       },
                     ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────
-//  Product Grid
-// ─────────────────────────────────────────
-class _ProductGrid extends StatelessWidget {
-  final List<ProductModels?> products;
-
-  final bool isInitialLoading;    
-  final bool isLoadingMore;       
-  final ScrollController scrollController;
-  final Set<int> wishlisted;
-  final ValueChanged<ProductModels> onTap;
-  final ValueChanged<ProductModels> onWishlistTap;
-
-
-  const _ProductGrid({
-    required this.products,
-    required this.isInitialLoading,
-    required this.isLoadingMore,
-    required this.scrollController,
-    required this.wishlisted,
-    required this.onTap,
-    required this.onWishlistTap,
-   
-  });
-
-  @override
-  Widget build(BuildContext context) {
-
-    if (products.isEmpty && !isInitialLoading) {
-      return const _EmptyView();
-    }
-
-    return CustomScrollView(
-      controller: scrollController,
-      slivers: [
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-          sliver: SliverGrid(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final product = products[index];
-                return ProductCard(
-                  product: product,
-                  
-                  
-                  isLoading: isInitialLoading,
-                 
-                  isWishlisted: product != null && wishlisted.contains(product.id),
-                  onTap: product != null ? () => onTap(product) : null,
-                  onWishlistTap: product != null ? () => onWishlistTap(product) : null,
-                );
-              },
-              childCount: products.length,
-            ),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisSpacing: 14,
-              crossAxisSpacing: 14,
-              childAspectRatio: 0.68,
-            ),
-          ),
-        ),
-        //
-        if (isLoadingMore)
-          const SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 20),
-              child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
-            ),
-          ),
-        const SliverToBoxAdapter(child: SizedBox(height: 20)),
-      ],
-    );
-  }
-}
-
-// ─────────────────────────────────────────
-//  Filter Chip
-// ─────────────────────────────────────────
-class _FilterChip extends StatelessWidget {
-  final String label;
-  final VoidCallback onRemove;
-
-  const _FilterChip({required this.label, required this.onRemove});
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Container(
-      margin: const EdgeInsets.only(right: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: colorScheme.primary.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: colorScheme.primary.withOpacity(0.3)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            label,
-            style: AppTextStyles.caption.copyWith(
-              color: colorScheme.primary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(width: 4),
-          GestureDetector(
-            onTap: onRemove,
-            child: Icon(Icons.close_rounded, size: 14, color: colorScheme.primary),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────
-//  Empty View
-// ─────────────────────────────────────────
-class _EmptyView extends StatelessWidget {
-  const _EmptyView();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.search_off_rounded, size: 64, color: Colors.grey.shade300),
-          const SizedBox(height: 16),
-          Text(
-            'No products found',
-            style: AppTextStyles.title.copyWith(color: Colors.grey.shade500),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'Try adjusting your search or filters',
-            style: AppTextStyles.caption,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────
-//  Error View
-// ─────────────────────────────────────────
-class _ErrorView extends StatelessWidget {
-  final String message;
-  final VoidCallback onRetry;
-
-  const _ErrorView({required this.message, required this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.wifi_off_rounded, size: 64, color: Colors.grey.shade300),
-            const SizedBox(height: 16),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: AppTextStyles.body.copyWith(color: Colors.grey.shade600),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: const Text('Try Again'),
             ),
           ],
         ),

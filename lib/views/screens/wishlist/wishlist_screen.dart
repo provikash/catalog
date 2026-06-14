@@ -1,11 +1,12 @@
 import 'package:catalog/core/themes/theme.dart';
+import 'package:catalog/views/screens/wishlist/widgets/empty_wishlist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
-import '../../controllers/product_notifier.dart';
-import '../../models/product_models.dart';
-import 'product_detail_screen.dart';
+import '../../../controllers/product_notifier.dart';
+import '../../../models/product_models.dart';
+import '../product_detail/product_detail_screen.dart';
 
 class WishlistScreen extends ConsumerWidget {
   const WishlistScreen({super.key});
@@ -34,7 +35,9 @@ class WishlistScreen extends ConsumerWidget {
                     child: Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: colorScheme.surfaceVariant.withOpacity(0.5),
+                        color: colorScheme.surfaceContainerHighest.withValues(
+                          alpha: 0.5,
+                        ),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
@@ -52,7 +55,7 @@ class WishlistScreen extends ConsumerWidget {
                         'Wishlist',
                         style: textTheme.headlineLarge?.copyWith(
                           fontSize: 24,
-                          color: colorScheme.onBackground,
+                          color: colorScheme.onSurface,
                         ),
                       ),
                       Text(
@@ -72,9 +75,7 @@ class WishlistScreen extends ConsumerWidget {
             // Content
             Expanded(
               child: wishlisted.isEmpty
-                  ? _EmptyWishlist(
-                      onBrowse: () => Navigator.pop(context),
-                    )
+                  ? EmptyWishlist(onBrowse: () => Navigator.pop(context))
                   : ListView.builder(
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
                       itemCount: wishlisted.length,
@@ -131,10 +132,14 @@ class _WishlistItemState extends State<_WishlistItem>
   void initState() {
     super.initState();
     _controller = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 120), value: 1.0);
-    _scaleAnim = Tween<double>(begin: 0.97, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+      vsync: this,
+      duration: const Duration(milliseconds: 120),
+      value: 1.0,
     );
+    _scaleAnim = Tween<double>(
+      begin: 0.97,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -173,30 +178,38 @@ class _WishlistItemState extends State<_WishlistItem>
           ),
           child: Row(
             children: [
+
+
               // Image
-              ClipRRect(
+ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: CachedNetworkImage(
-                  imageUrl: widget.product.thumbnail,
-                  width: 80,
-                  height: 80,
-                  fit: BoxFit.cover,
-                  placeholder: (_, __) => Container(
+                child: Hero(
+                  tag: 'product-image-${widget.product.id}',
+                  child: CachedNetworkImage(
+                    imageUrl: widget.product.thumbnail,
                     width: 80,
                     height: 80,
-                    color: AppColors.imageBackground,
-                  ),
-                  errorWidget: (_, __, ___) => Container(
-                    width: 80,
-                    height: 80,
-                    color: colorScheme.surfaceVariant,
-                    child: const Icon(
-                      Icons.image_not_supported,
-                      color: AppColors.wishlistInactive,
+                    fit: BoxFit.cover,
+                    placeholder: (context, progress) => Container(
+                      width: 80,
+                      height: 80,
+                      color: colorScheme.surfaceContainerHighest
+                    ),
+                    errorWidget: (context, error, stackTrace) => Container(
+                      width: 80,
+                      height: 80,
+                      color: colorScheme.surfaceContainerHighest,
+                      child: const Icon(
+                        Icons.image_not_supported,
+                        color: AppColors.wishlistInactive,
+                      ),
                     ),
                   ),
                 ),
-              ),
+
+),
+            
+              
               const SizedBox(width: 14),
 
               // Info
@@ -263,7 +276,7 @@ class _WishlistItemState extends State<_WishlistItem>
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: colorScheme.error.withOpacity(0.1),
+                    color: colorScheme.error.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
@@ -276,63 +289,7 @@ class _WishlistItemState extends State<_WishlistItem>
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _EmptyWishlist extends StatelessWidget {
-  final VoidCallback onBrowse;
-
-  const _EmptyWishlist({required this.onBrowse});
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(40),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.favorite_border_rounded,
-              size: 72,
-              color: AppColors.wishlistInactive,
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'Your wishlist is empty',
-              style: textTheme.titleLarge?.copyWith(
-                fontSize: 18,
-                color: colorScheme.onBackground,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Tap the heart icon on any product to save it here',
-              textAlign: TextAlign.center,
-              style: textTheme.bodyLarge?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 28),
-            ElevatedButton(
-              onPressed: onBrowse,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 32, vertical: 14),
-              ),
-              child: const Text(
-                'Browse Products',
-                style: AppTextStyles.button,
-              ),
-            ),
-          ],
-        ),
-      ),
+      )
     );
   }
 }

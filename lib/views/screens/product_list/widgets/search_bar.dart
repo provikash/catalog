@@ -61,11 +61,11 @@ class _ProductSearchBarState extends State<ProductSearchBar> {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             decoration: BoxDecoration(
-              color: colorScheme.surfaceVariant.withOpacity(0.5),
+              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
                 color: _hasText
-                    ? colorScheme.primary.withOpacity(0.5)
+                    ? colorScheme.primary.withValues(alpha: 0.5)
                     : Colors.transparent,
                 width: 1.5,
               ),
@@ -121,7 +121,7 @@ class _ProductSearchBarState extends State<ProductSearchBar> {
               borderRadius: BorderRadius.circular(14),
               boxShadow: [
                 BoxShadow(
-                  color: colorScheme.primary.withOpacity(0.35),
+                  color: colorScheme.primary.withValues(alpha: 0.35),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),

@@ -43,6 +43,9 @@ class ProductNotifier extends Notifier<ProductState> {
       hasMore: true,
       searchQuery: '',
       selectedCategory: null,
+      clearCategory: true,   
+    clearSearch: true,    
+    clearError: true,
     );
 
     try {
@@ -55,7 +58,6 @@ class ProductNotifier extends Notifier<ProductState> {
         hasMore: response.products.length < response.total,
       );
     } catch (e) {
-      debugPrint('❌ loadProducts error: $e');
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
@@ -83,7 +85,6 @@ class ProductNotifier extends Notifier<ProductState> {
         hasMore: updatedProducts.length < response.total,
       );
     } catch (e) {
-      debugPrint('❌ loadMore error: $e');
       state = state.copyWith(isLoadingMore: false, error: e.toString());
     }
   }
@@ -120,7 +121,6 @@ class ProductNotifier extends Notifier<ProductState> {
         hasMore: false, // disable pagination during search
       );
     } catch (e) {
-      debugPrint('❌ search error: $e');
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
@@ -151,7 +151,6 @@ class ProductNotifier extends Notifier<ProductState> {
         hasMore: false, // disable pagination during category filter
       );
     } catch (e) {
-      debugPrint('❌ filterByCategory error: $e');
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
@@ -162,7 +161,7 @@ class ProductNotifier extends Notifier<ProductState> {
       final categories = await _apiService.getCategories();
       state = state.copyWith(categories: categories);
     } catch (e) {
-      debugPrint('❌ loadCategories error: $e');
+    
       // non-critical — don't set error state for this
     }
   }
@@ -220,13 +219,13 @@ class ProductNotifier extends Notifier<ProductState> {
       final prefs = await SharedPreferences.getInstance();
 
       final jsonList = products
-          .map((p) => jsonEncode(p.tojson())) // ✅ each product → JSON string
+          .map((p) => jsonEncode(p.tojson())) 
           .toList();
 
       await prefs.setStringList('wishlistKey', jsonList);
-      debugPrint('✅ Saved ${products.length} wishlist items');
+      
     } catch (e) {
-      debugPrint('❌ Failed to save wishlist: $e');
+      
     }
   }
 
@@ -240,34 +239,42 @@ class ProductNotifier extends Notifier<ProductState> {
       for (final jsonStr in jsonList) {
         try {
           final decoded = jsonDecode(jsonStr);
-          // ✅ skip if it's not a Map (old format — plain IDs)
+
           if (decoded is! Map<String, dynamic>) {
-            debugPrint('⚠️ Skipping invalid wishlist entry: $decoded');
+        
             continue;
           }
           products.add(ProductModels.fromJson(decoded));
         } catch (e) {
-          debugPrint('⚠️ Skipping corrupt entry: $e');
+
           continue; // skip bad entries, don't crash
         }
       }
 
-      // ✅ if old format detected, clear and start fresh
+
       if (products.isEmpty && jsonList.isNotEmpty) {
-        debugPrint('🧹 Clearing old wishlist format');
+
         await prefs.remove('wishlistKey');
       }
 
-      debugPrint('✅ Loaded ${products.length} wishlist items');
+
       state = state.copyWith(wishlistedProducts: products);
     } catch (e) {
-      debugPrint('❌ Failed to load wishlist: $e');
+
     }
   }
 
   Future<void> _clearOldWishlist() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('wishlist_products');
-    debugPrint('🧹 Old wishlist cleared');
+
   }
+
+  void changeSelectedImage(int index) {
+  state = state.copyWith(
+    selectedImageIndex: index,
+  );
+}
+
+
 }
