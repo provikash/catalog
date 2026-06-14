@@ -6,7 +6,7 @@ A modern Flutter e-commerce product explorer app built as part of an internship 
 
 ## 📱 Download APK
 
-> **[⬇️ Download Latest APK](https://github.com/provikash/catalog/raw/main/build/app/outputs/flutter-apk/app-release.apk)**
+> **[⬇️ Download Latest APK](https://github.com/provikash/catalog/main/build/app/outputs/flutter-apk/app-release.apk)**
 
 ---
 
