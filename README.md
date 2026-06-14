@@ -10,6 +10,22 @@ A modern Flutter e-commerce product explorer app built as part of an internship 
 
 ---
 
+
+---
+
+## 📁 Assignment Structure
+
+```
+catalog/
+├── lib/                  # Part 1 — Flutter Product Explorer App
+├── Part 2/               # Part 2 solution
+├── Part 3/               # Part 3 solution
+└── Tools/
+    ├── apk/              # Release APK
+    └── screenshots/      # App screenshots
+```
+
+
 ## ✨ Features
 
 | Feature | Details |
@@ -226,19 +242,6 @@ Hero(tag: 'product-image-${product.id}', child: CachedNetworkImage(...))
 TweenSequence<double>([...]).animate(_heartController);
 ```
 
----
-
-## 📁 Assignment Structure
-
-```
-catalog/
-├── lib/                  # Part 1 — Flutter Product Explorer App
-├── Part 2/               # Part 2 solution
-├── Part 3/               # Part 3 solution
-└── Tools/
-    ├── apk/              # Release APK
-    └── screenshots/      # App screenshots
-```
 
 ---
 
